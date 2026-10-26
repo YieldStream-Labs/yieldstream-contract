@@ -9,7 +9,7 @@ version = "0.1.0"
 edition = "2021"
 authors = ["YieldStream Protocol <dev@yieldstream.org>"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/CHASE3020/yieldstream-contract"
+repository = "https://github.com/YieldStream-Labs/yieldstream-contract"
 
 [profile.release]
 opt-level = "z"
