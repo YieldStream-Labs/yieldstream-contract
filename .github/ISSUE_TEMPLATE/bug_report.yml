@@ -1,0 +1,39 @@
+name: Bug report
+description: Report incorrect behavior in the distributor contract, tests, or tooling
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For security vulnerabilities, use private disclosure instead — see SECURITY.md.
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: What happened vs what you expected?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Minimal steps — a failing test or `stellar` CLI invocation beats prose.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Can funds be lost, double-claimed, or locked? Which entrypoints?
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: Network (testnet/pubnet/standalone), contract WASM hash or version, toolchain
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs / diagnostic output

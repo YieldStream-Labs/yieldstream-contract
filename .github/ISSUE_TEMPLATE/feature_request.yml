@@ -1,0 +1,35 @@
+name: Feature request
+description: Propose a new capability, tooling improvement, or docs addition
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is missing or painful today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: API sketch (new entrypoint? SDK helper?), storage footprint, event changes.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - contract
+        - merkle / proofs
+        - storage / TTL
+        - tooling / scripts
+        - docs
+        - tests
+    validations:
+      required: true

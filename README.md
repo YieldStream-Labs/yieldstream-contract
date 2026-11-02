@@ -3,7 +3,7 @@
 [![CI](https://github.com/CHASE3020/yieldstream-contract/actions/workflows/ci.yml/badge.svg)](https://github.com/CHASE3020/yieldstream-contract)
 [![Stellar Protocol](https://img.shields.io/badge/Stellar-Protocol%2022%2F25-blue)](https://stellar.org)
 [![Target](https://img.shields.io/badge/target-wasm32--v1--none-green)](https://github.com/stellar/rs-soroban-sdk)
-[![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
 
 **YieldStream** is a multi-tenant, high-performance Merkle distributor smart contract engineered for the Stellar Soroban ecosystem. It enables protocols, yield aggregators, DAOs, and projects to distribute rewards, token incentives, retroactive yield, and airdrops to thousands of recipients efficiently using cryptographic inclusion proofs.
 
@@ -106,4 +106,15 @@ Optimized WASM will be output at:
 ```bash
 ./scripts/deploy.sh --network testnet --source <IDENTITY>
 ```
-EOF
+
+---
+
+## Documentation
+
+- [Contributing guide](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+- [Open issues](https://github.com/CHASE3020/yieldstream-contract/issues) — pick one and ask to be assigned
+
+## License
+
+Dual-licensed at the recipient's option under either the [MIT License](LICENSE-MIT) or the [Apache License 2.0](LICENSE-APACHE).
