@@ -83,6 +83,18 @@ $$\text{parent} = \text{SHA-256}(0\text{x}01 \mathbin{\Vert} \min(a, b) \mathbin
 
 ---
 
+## Networks
+
+| Network | Contract |
+|---|---|
+| Testnet | `CC25WDHZ7SQC2UMZJHIPYM2U5ROYFXVDZMP3THMIL3IJY6HOCGGX2FPG` |
+| Mainnet | _planned — see issue discussion_ |
+
+Deployed demo campaigns cover the full lifecycle: escrow, proof-based claims,
+double-claim rejection, completion, cancel → sweep refund.
+
+---
+
 ## Quickstart
 
 ### Prerequisites
