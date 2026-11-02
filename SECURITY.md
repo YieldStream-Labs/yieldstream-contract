@@ -5,7 +5,7 @@
 If you find a security issue in the YieldStream distributor contract or its
 tooling, please report it **privately**:
 
-- Use [GitHub private vulnerability disclosure](https://github.com/CHASE3020/yieldstream-contract/security/advisories/new), or
+- Use [GitHub private vulnerability disclosure](https://github.com/yieldstream-org/yieldstream-contract/security/advisories/new), or
 - Email the maintainers via the contact listed in the repo profile.
 
 Please do **not** open a public issue for vulnerabilities.

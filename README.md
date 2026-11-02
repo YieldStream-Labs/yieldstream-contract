@@ -1,6 +1,6 @@
 # YieldStream: Multi-Tenant Merkle Distributor
 
-[![CI](https://github.com/CHASE3020/yieldstream-contract/actions/workflows/ci.yml/badge.svg)](https://github.com/CHASE3020/yieldstream-contract)
+[![CI](https://github.com/yieldstream-org/yieldstream-contract/actions/workflows/ci.yml/badge.svg)](https://github.com/yieldstream-org/yieldstream-contract)
 [![Stellar Protocol](https://img.shields.io/badge/Stellar-Protocol%2022%2F25-blue)](https://stellar.org)
 [![Target](https://img.shields.io/badge/target-wasm32--v1--none-green)](https://github.com/stellar/rs-soroban-sdk)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
@@ -113,7 +113,7 @@ Optimized WASM will be output at:
 
 - [Contributing guide](CONTRIBUTING.md)
 - [Security policy](SECURITY.md)
-- [Open issues](https://github.com/CHASE3020/yieldstream-contract/issues) — pick one and ask to be assigned
+- [Open issues](https://github.com/yieldstream-org/yieldstream-contract/issues) — pick one and ask to be assigned
 
 ## License
 
