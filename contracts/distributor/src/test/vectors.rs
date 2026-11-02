@@ -6,10 +6,7 @@ use super::{build_test_tree, setup_test, SimpleClaimItem};
 use crate::merkle::compute_leaf;
 use crate::types::DistributionStatus;
 use serde::{Deserialize, Serialize};
-use soroban_sdk::{
-    testutils::Address as _,
-    Address, BytesN, Env, String as SorobanString, Vec,
-};
+use soroban_sdk::{testutils::Address as _, Address, BytesN, Env, String as SorobanString, Vec};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ClaimVector {
@@ -169,16 +166,17 @@ fn generate_and_verify_vector_file() {
 
     let vector_file = VectorFile {
         version: "v1.0.0".into(),
-        description: "Deterministic Merkle test vectors for YieldStream Distributor contract".into(),
+        description: "Deterministic Merkle test vectors for YieldStream Distributor contract"
+            .into(),
         trees: std::vec![tree_vec_4, tree_vec_2],
     };
 
     let json_output = serde_json::to_string_pretty(&vector_file).expect("Serialize to json");
-    std::fs::write(
-        "/home/gamp/yieldstream-contract/test-vectors/merkle_v1.json",
-        json_output,
-    )
-    .expect("Write vector file");
+    let vector_path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../test-vectors/merkle_v1.json"
+    );
+    std::fs::write(vector_path, json_output).expect("Write vector file");
 }
 
 #[test]
@@ -244,13 +242,9 @@ fn test_verify_merkle_test_vectors_e2e() {
 
             // Claim allocation on-chain
             let bal_before = fixture.token.balance(&recipient);
-            fixture.client.claim(
-                &dist_id,
-                &claim.index,
-                &recipient,
-                &claim.amount,
-                &proof,
-            );
+            fixture
+                .client
+                .claim(&dist_id, &claim.index, &recipient, &claim.amount, &proof);
             let bal_after = fixture.token.balance(&recipient);
             assert_eq!(bal_after - bal_before, claim.amount);
 

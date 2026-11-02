@@ -234,17 +234,15 @@ fn test_tampered_amount_or_recipient_rejected() {
     );
 
     // Tampered amount (trying to claim more than leaf allows)
-    let res_amount =
-        fixture
-            .client
-            .try_claim(&dist_id, &0, &recipient, &60_000, &tree.proofs[0]);
+    let res_amount = fixture
+        .client
+        .try_claim(&dist_id, &0, &recipient, &60_000, &tree.proofs[0]);
     assert_eq!(res_amount, Err(Ok(ContractError::InvalidProof)));
 
     // Tampered recipient (attacker trying to claim with recipient's proof)
-    let res_attacker =
-        fixture
-            .client
-            .try_claim(&dist_id, &0, &attacker, &amount, &tree.proofs[0]);
+    let res_attacker = fixture
+        .client
+        .try_claim(&dist_id, &0, &attacker, &amount, &tree.proofs[0]);
     assert_eq!(res_attacker, Err(Ok(ContractError::InvalidProof)));
 }
 

@@ -77,7 +77,13 @@ pub fn build_test_tree(
 ) -> GeneratedTree {
     let mut leaves: StdVec<BytesN<32>> = StdVec::new();
     for item in items.iter() {
-        let leaf = compute_leaf(env, distribution_id, item.index, &item.recipient, item.amount);
+        let leaf = compute_leaf(
+            env,
+            distribution_id,
+            item.index,
+            &item.recipient,
+            item.amount,
+        );
         leaves.push(leaf);
     }
 

@@ -43,10 +43,7 @@ fn test_create_distribution_success() {
     // Verify token transfer to contract
     let balance_after = fixture.token.balance(&fixture.creator);
     assert_eq!(balance_before - balance_after, total_amount);
-    assert_eq!(
-        fixture.token.balance(&fixture.contract_id),
-        total_amount
-    );
+    assert_eq!(fixture.token.balance(&fixture.contract_id), total_amount);
 
     // Verify stored distribution state
     let dist = fixture.client.get_distribution(&dist_id);
@@ -115,10 +112,7 @@ fn test_multi_tenant_distributions() {
     assert_eq!(dist_b.creator, tenant_b);
     assert_eq!(dist_c.creator, tenant_c);
 
-    assert_eq!(
-        fixture.token.balance(&fixture.contract_id),
-        600_000
-    );
+    assert_eq!(fixture.token.balance(&fixture.contract_id), 600_000);
 }
 
 #[test]
