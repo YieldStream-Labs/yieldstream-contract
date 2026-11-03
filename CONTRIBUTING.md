@@ -58,3 +58,9 @@ distributor for Soroban on Stellar.
 By contributing, you agree that your contributions will be licensed under both
 the MIT License (`LICENSE-MIT`) and Apache License 2.0 (`LICENSE-APACHE`), at
 the recipient's option.
+
+## Code of conduct
+
+Participation in this repository and every other `yieldstream-org`
+space is governed by [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Reporting
+concerns is described there.

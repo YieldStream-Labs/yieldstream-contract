@@ -137,6 +137,7 @@ Optimized WASM will be output at:
 - [Protocol documentation site](https://yieldstream-protocol.vercel.app/docs) —
   leaf/node format, full function reference, storage and TTL policy
 - [Contributing guide](CONTRIBUTING.md)
+- [Code of conduct](CODE_OF_CONDUCT.md)
 - [Security policy](SECURITY.md)
 - [Issue backlog](docs/ISSUE_BACKLOG.md)
 - [Open issues](https://github.com/yieldstream-org/yieldstream-contract/issues) — pick one and ask to be assigned
