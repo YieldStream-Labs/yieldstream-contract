@@ -8,7 +8,7 @@
 [![Target](https://img.shields.io/badge/target-wasm32--v1--none-green)](https://github.com/stellar/rs-soroban-sdk)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
 
-[Testnet contract](https://stellar.expert/explorer/testnet/contract/CC25WDHZ7SQC2UMZJHIPYM2U5ROYFXVDZMP3THMIL3IJY6HOCGGX2FPG) · [Live site](https://yieldstream-protocol.vercel.app) · [Issue backlog](https://github.com/yieldstream-org/yieldstream-contract/issues)
+[Testnet contract](https://stellar.expert/explorer/testnet/contract/CC25WDHZ7SQC2UMZJHIPYM2U5ROYFXVDZMP3THMIL3IJY6HOCGGX2FPG) · [Live site](https://yieldstream-protocol.vercel.app) · [Docs](https://yieldstream-protocol.vercel.app/docs) · [Issue backlog](https://github.com/yieldstream-org/yieldstream-contract/issues)
 
 </div>
 
@@ -134,6 +134,8 @@ Optimized WASM will be output at:
 
 ## Documentation
 
+- [Protocol documentation site](https://yieldstream-protocol.vercel.app/docs) —
+  leaf/node format, full function reference, storage and TTL policy
 - [Contributing guide](CONTRIBUTING.md)
 - [Security policy](SECURITY.md)
 - [Issue backlog](docs/ISSUE_BACKLOG.md)
