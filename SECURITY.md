@@ -6,9 +6,20 @@ If you find a security issue in the YieldStream distributor contract or its
 tooling, please report it **privately**:
 
 - Use [GitHub private vulnerability disclosure](https://github.com/yieldstream-org/yieldstream-contract/security/advisories/new), or
-- Email the maintainers via the contact listed in the repo profile.
+- Open a draft security advisory against the repository.
 
 Please do **not** open a public issue for vulnerabilities.
+
+## Audit status
+
+**This contract has not been externally audited.** It is deployed to Stellar
+testnet only. The safeguards that exist are in-repo: 21 tests, RFC 6962
+domain separation with sorted-pair proofs, deterministic test vectors pinned in
+`test-vectors/merkle_v1.json`, and CI running `cargo fmt --check`,
+`clippy -D warnings`, and the full suite on every push.
+
+Do not custody mainnet funds with this contract. Known open fund-safety issues
+are tracked publicly in the issue backlog rather than hidden.
 
 ## Scope
 

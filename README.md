@@ -1,3 +1,6 @@
+<div align="center">
+<img src="https://raw.githubusercontent.com/yieldstream-org/yieldstream-app/main/app/icon.svg" alt="YieldStream logo" width="80" height="80" />
+
 # YieldStream: Multi-Tenant Merkle Distributor
 
 [![CI](https://github.com/yieldstream-org/yieldstream-contract/actions/workflows/ci.yml/badge.svg)](https://github.com/yieldstream-org/yieldstream-contract)
@@ -5,7 +8,15 @@
 [![Target](https://img.shields.io/badge/target-wasm32--v1--none-green)](https://github.com/stellar/rs-soroban-sdk)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
 
+[Testnet contract](https://stellar.expert/explorer/testnet/contract/CC25WDHZ7SQC2UMZJHIPYM2U5ROYFXVDZMP3THMIL3IJY6HOCGGX2FPG) · [Live site](https://yieldstream-protocol.vercel.app) · [Issue backlog](https://github.com/yieldstream-org/yieldstream-contract/issues)
+
+</div>
+
 **YieldStream** is a multi-tenant, high-performance Merkle distributor smart contract engineered for the Stellar Soroban ecosystem. It enables protocols, yield aggregators, DAOs, and projects to distribute rewards, token incentives, retroactive yield, and airdrops to thousands of recipients efficiently using cryptographic inclusion proofs.
+
+> **Status:** deployed and lifecycle-verified on **testnet**. **Not externally
+> audited** — see [SECURITY.md](./SECURITY.md). Unclaimed funds sweep back to
+> the creator; the open issues on fund-safety paths are tracked in the backlog.
 
 ---
 
@@ -125,7 +136,26 @@ Optimized WASM will be output at:
 
 - [Contributing guide](CONTRIBUTING.md)
 - [Security policy](SECURITY.md)
+- [Issue backlog](docs/ISSUE_BACKLOG.md)
 - [Open issues](https://github.com/yieldstream-org/yieldstream-contract/issues) — pick one and ask to be assigned
+
+## Maintainers
+
+| | |
+|---|---|
+| Owner / lead | [@CHASE3020](https://github.com/CHASE3020) |
+| Triage | Applications and PRs answered within 48h, review within 5 days |
+| Security | [Private disclosure](https://github.com/yieldstream-org/yieldstream-contract/security/advisories/new) |
+
+Part of the [YieldStream org](https://github.com/yieldstream-org) — see also
+[`yieldstream-sdk`](https://github.com/yieldstream-org/yieldstream-sdk) and
+[`yieldstream-app`](https://github.com/yieldstream-org/yieldstream-app).
+
+## Contributors
+
+<a href="https://contrib.rocks/image?repo=yieldstream-org/yieldstream-contract">
+<img src="https://contrib.rocks/image?repo=yieldstream-org/yieldstream-contract" alt="Contributors" />
+</a>
 
 ## License
 
