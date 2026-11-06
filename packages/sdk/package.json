@@ -1,0 +1,28 @@
+{
+  "name": "@yieldstream/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript client and Merkle tooling for the YieldStream distributor on Stellar/Soroban",
+  "license": "MIT OR Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.9"
+  }
+}
