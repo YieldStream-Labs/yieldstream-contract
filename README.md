@@ -45,6 +45,9 @@ yieldstream-contract/
 ├── rust-toolchain.toml             # Pinned Rust toolchain and WASM targets
 ├── scripts/
 │   └── deploy.sh                   # Automated deployment and setup script
+├── docs/
+│   ├── ISSUE_BACKLOG.md            # Contributor issue backlog
+│   └── UPGRADING.md                # Contract upgradability runbook & trust analysis
 ├── test-vectors/
 │   └── merkle_v1.json              # Canonical test vectors with proofs
 ├── packages/sdk/                   # @yieldstream/sdk TypeScript client & Merkle tooling
@@ -90,6 +93,9 @@ $$\text{parent} = \text{SHA-256}(0\text{x}01 \mathbin{\Vert} \min(a, b) \mathbin
 | `sweep(distribution_id, to)` | Creator Auth | Sweeps remaining unclaimed tokens if expired or cancelled. |
 | `get_distribution(distribution_id)` | Read-only | Returns distribution details and current status. |
 | `is_claimed(distribution_id, index)` | Read-only | Checks if a leaf index has already been claimed. |
+| `get_version()` | Read-only | Returns current contract code version. |
+| `get_admin()` | Read-only | Returns current contract administrator address. |
+| `upgrade(new_wasm_hash)` | Admin Auth | Upgrades contract WASM bytecode with version tracking (see [docs/UPGRADING.md](docs/UPGRADING.md)). |
 | `compute_leaf(distribution_id, index, recipient, amount)` | Pure Helper | Computes leaf hash according to contract format. |
 | `verify_proof(proof, root, leaf)` | Pure Helper | Verifies Merkle inclusion against root. |
 

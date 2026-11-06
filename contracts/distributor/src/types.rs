@@ -51,6 +51,8 @@ pub enum DataKey {
     Admin,
     /// Instance key: total distributions count (u32).
     DistributionCount,
+    /// Instance key: contract version tracking (u32).
+    Version,
     /// Persistent key: distribution metadata by ID.
     Distribution(u32),
     /// Persistent key: claimed leaf record (distribution_id, leaf_index) -> bool.
