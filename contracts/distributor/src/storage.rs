@@ -61,6 +61,17 @@ pub fn set_admin(env: &Env, admin: &Address) {
     bump_instance(env);
 }
 
+/// Gets the current contract version, defaulting to 1 for initial deployments.
+pub fn get_version(env: &Env) -> u32 {
+    env.storage().instance().get(&DataKey::Version).unwrap_or(1)
+}
+
+/// Sets the contract version in instance storage and extends instance TTL.
+pub fn set_version(env: &Env, version: u32) {
+    env.storage().instance().set(&DataKey::Version, &version);
+    bump_instance(env);
+}
+
 /// Gets the total number of distributions created so far.
 pub fn get_distribution_count(env: &Env) -> u32 {
     env.storage()

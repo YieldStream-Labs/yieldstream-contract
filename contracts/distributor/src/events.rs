@@ -52,3 +52,15 @@ pub fn distribution_swept(
     let data = (recipient.clone(), swept_amount);
     env.events().publish(topics, data);
 }
+
+/// Emits an event when the contract is upgraded to a new Wasm executable.
+pub fn contract_upgraded(
+    env: &Env,
+    old_version: u32,
+    new_version: u32,
+    new_wasm_hash: &BytesN<32>,
+) {
+    let topics = (symbol_short!("upgrade"), old_version, new_version);
+    let data = new_wasm_hash.clone();
+    env.events().publish(topics, data);
+}

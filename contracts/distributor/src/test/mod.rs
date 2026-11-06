@@ -1,6 +1,7 @@
 mod cancel_sweep;
 mod claim;
 mod create;
+mod upgrade;
 mod vectors;
 
 extern crate std;

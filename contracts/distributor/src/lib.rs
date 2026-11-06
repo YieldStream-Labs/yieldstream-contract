@@ -25,6 +25,27 @@ impl YieldStreamDistributor {
         }
         admin.require_auth();
         storage::set_admin(&env, &admin);
+        storage::set_version(&env, 1);
+        Ok(())
+    }
+
+    /// Upgrades the contract executable Wasm code to a new uploaded Wasm hash.
+    /// Restricted to contract administrator.
+    pub fn upgrade(env: Env, new_wasm_hash: BytesN<32>) -> Result<(), ContractError> {
+        let admin = storage::get_admin(&env)?;
+        admin.require_auth();
+        storage::bump_instance(&env);
+
+        let current_version = storage::get_version(&env);
+        let new_version = current_version
+            .checked_add(1)
+            .ok_or(ContractError::ArithmeticOverflow)?;
+        storage::set_version(&env, new_version);
+
+        env.deployer()
+            .update_current_contract_wasm(new_wasm_hash.clone());
+        events::contract_upgraded(&env, current_version, new_version, &new_wasm_hash);
+
         Ok(())
     }
 
@@ -249,6 +270,11 @@ impl YieldStreamDistributor {
     /// View: Gets the initialized contract administrator.
     pub fn get_admin(env: Env) -> Result<Address, ContractError> {
         storage::get_admin(&env)
+    }
+
+    /// View: Gets the current contract version.
+    pub fn get_version(env: Env) -> u32 {
+        storage::get_version(&env)
     }
 
     /// Helper: Computes the leaf hash for given distribution claim parameters.
