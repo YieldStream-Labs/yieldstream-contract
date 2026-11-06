@@ -50,6 +50,7 @@ yieldstream-contract/
 │   └── UPGRADING.md                # Contract upgradability runbook & trust analysis
 ├── test-vectors/
 │   └── merkle_v1.json              # Canonical test vectors with proofs
+├── packages/sdk/                   # @yieldstream/sdk TypeScript client & Merkle tooling
 └── contracts/distributor/
     ├── Cargo.toml                  # Distributor contract manifest
     └── src/
@@ -142,6 +143,7 @@ Optimized WASM will be output at:
 
 - [Protocol documentation site](https://yieldstream-protocol.vercel.app/docs) —
   leaf/node format, full function reference, storage and TTL policy
+- [TypeScript SDK (`@yieldstream/sdk`)](packages/sdk/README.md) — typed client, Merkle tree generator, and Freighter tx builders
 - [Contributing guide](CONTRIBUTING.md)
 - [Code of conduct](CODE_OF_CONDUCT.md)
 - [Security policy](SECURITY.md)
