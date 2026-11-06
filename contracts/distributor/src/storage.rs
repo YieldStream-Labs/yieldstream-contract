@@ -25,17 +25,21 @@ pub fn bump_instance(env: &Env) {
 /// Extends the TTL of a specific distribution record in persistent storage.
 pub fn bump_distribution(env: &Env, id: u32) {
     let key = DataKey::Distribution(id);
-    env.storage()
-        .persistent()
-        .extend_ttl(&key, PERSISTENT_LIFETIME_THRESHOLD, PERSISTENT_BUMP_AMOUNT);
+    env.storage().persistent().extend_ttl(
+        &key,
+        PERSISTENT_LIFETIME_THRESHOLD,
+        PERSISTENT_BUMP_AMOUNT,
+    );
 }
 
 /// Extends the TTL of a specific claimed record in persistent storage.
 pub fn bump_claimed(env: &Env, id: u32, index: u32) {
     let key = DataKey::Claimed(id, index);
-    env.storage()
-        .persistent()
-        .extend_ttl(&key, PERSISTENT_LIFETIME_THRESHOLD, PERSISTENT_BUMP_AMOUNT);
+    env.storage().persistent().extend_ttl(
+        &key,
+        PERSISTENT_LIFETIME_THRESHOLD,
+        PERSISTENT_BUMP_AMOUNT,
+    );
 }
 
 /// Checks if an administrator address has been initialized.

@@ -1,11 +1,22 @@
+<div align="center">
+<img src="https://raw.githubusercontent.com/yieldstream-org/yieldstream-app/main/app/icon.svg" alt="YieldStream logo" width="80" height="80" />
+
 # YieldStream: Multi-Tenant Merkle Distributor
 
-[![CI](https://github.com/YieldStream-Labs/yieldstream-contract/actions/workflows/ci.yml/badge.svg)](https://github.com/YieldStream-Labs/yieldstream-contract)
+[![CI](https://github.com/yieldstream-org/yieldstream-contract/actions/workflows/ci.yml/badge.svg)](https://github.com/yieldstream-org/yieldstream-contract)
 [![Stellar Protocol](https://img.shields.io/badge/Stellar-Protocol%2022%2F25-blue)](https://stellar.org)
 [![Target](https://img.shields.io/badge/target-wasm32--v1--none-green)](https://github.com/stellar/rs-soroban-sdk)
-[![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
+
+[Testnet contract](https://stellar.expert/explorer/testnet/contract/CC25WDHZ7SQC2UMZJHIPYM2U5ROYFXVDZMP3THMIL3IJY6HOCGGX2FPG) · [Live site](https://yieldstream-protocol.vercel.app) · [Docs](https://yieldstream-protocol.vercel.app/docs) · [Issue backlog](https://github.com/yieldstream-org/yieldstream-contract/issues)
+
+</div>
 
 **YieldStream** is a multi-tenant, high-performance Merkle distributor smart contract engineered for the Stellar Soroban ecosystem. It enables protocols, yield aggregators, DAOs, and projects to distribute rewards, token incentives, retroactive yield, and airdrops to thousands of recipients efficiently using cryptographic inclusion proofs.
+
+> **Status:** deployed and lifecycle-verified on **testnet**. **Not externally
+> audited** — see [SECURITY.md](./SECURITY.md). Unclaimed funds sweep back to
+> the creator; the open issues on fund-safety paths are tracked in the backlog.
 
 ---
 
@@ -36,6 +47,7 @@ yieldstream-contract/
 │   └── deploy.sh                   # Automated deployment and setup script
 ├── test-vectors/
 │   └── merkle_v1.json              # Canonical test vectors with proofs
+├── packages/sdk/                   # @yieldstream/sdk TypeScript client & Merkle tooling
 └── contracts/distributor/
     ├── Cargo.toml                  # Distributor contract manifest
     └── src/
@@ -83,6 +95,18 @@ $$\text{parent} = \text{SHA-256}(0\text{x}01 \mathbin{\Vert} \min(a, b) \mathbin
 
 ---
 
+## Networks
+
+| Network | Contract |
+|---|---|
+| Testnet | `CC25WDHZ7SQC2UMZJHIPYM2U5ROYFXVDZMP3THMIL3IJY6HOCGGX2FPG` |
+| Mainnet | _planned — see issue discussion_ |
+
+Deployed demo campaigns cover the full lifecycle: escrow, proof-based claims,
+double-claim rejection, completion, cancel → sweep refund.
+
+---
+
 ## Quickstart
 
 ### Prerequisites
@@ -106,4 +130,38 @@ Optimized WASM will be output at:
 ```bash
 ./scripts/deploy.sh --network testnet --source <IDENTITY>
 ```
-EOF
+
+---
+
+## Documentation
+
+- [Protocol documentation site](https://yieldstream-protocol.vercel.app/docs) —
+  leaf/node format, full function reference, storage and TTL policy
+- [TypeScript SDK (`@yieldstream/sdk`)](packages/sdk/README.md) — typed client, Merkle tree generator, and Freighter tx builders
+- [Contributing guide](CONTRIBUTING.md)
+- [Code of conduct](CODE_OF_CONDUCT.md)
+- [Security policy](SECURITY.md)
+- [Issue backlog](docs/ISSUE_BACKLOG.md)
+- [Open issues](https://github.com/yieldstream-org/yieldstream-contract/issues) — pick one and ask to be assigned
+
+## Maintainers
+
+| | |
+|---|---|
+| Owner / lead | [@CHASE3020](https://github.com/CHASE3020) |
+| Triage | Applications and PRs answered within 48h, review within 5 days |
+| Security | [Private disclosure](https://github.com/yieldstream-org/yieldstream-contract/security/advisories/new) |
+
+Part of the [YieldStream org](https://github.com/yieldstream-org) — see also
+[`yieldstream-sdk`](https://github.com/yieldstream-org/yieldstream-sdk) and
+[`yieldstream-app`](https://github.com/yieldstream-org/yieldstream-app).
+
+## Contributors
+
+<a href="https://contrib.rocks/image?repo=yieldstream-org/yieldstream-contract">
+<img src="https://contrib.rocks/image?repo=yieldstream-org/yieldstream-contract" alt="Contributors" />
+</a>
+
+## License
+
+Dual-licensed at the recipient's option under either the [MIT License](LICENSE-MIT) or the [Apache License 2.0](LICENSE-APACHE).
