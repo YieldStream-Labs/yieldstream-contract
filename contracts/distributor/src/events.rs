@@ -52,6 +52,19 @@ pub fn distribution_claimed(
     env.events().publish(topics, data);
 }
 
+/// Emits an event when unvested tokens are returned to the stream issuer.
+pub fn stream_clawed_back(
+    env: &Env,
+    distribution_id: u32,
+    issuer: &Address,
+    amount: i128,
+    timestamp: u64,
+) {
+    let topics = (symbol_short!("clawback"), distribution_id, issuer.clone());
+    let data = (amount, timestamp);
+    env.events().publish(topics, data);
+}
+
 /// Emits an event when a distribution is cancelled by its creator.
 pub fn distribution_cancelled(
     env: &Env,

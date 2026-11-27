@@ -281,6 +281,53 @@ impl YieldStreamDistributor {
         Ok(())
     }
 
+    /// Claws back unvested tokens from a stream to the issuer.
+    ///
+    /// The vested-but-unclaimed balance stays in the contract for recipients.
+    /// Vesting is frozen at the clawback timestamp so no additional tokens vest.
+    pub fn clawback(env: Env, distribution_id: u32) -> Result<i128, ContractError> {
+        storage::bump_instance(&env);
+        let mut distribution = storage::get_distribution(&env, distribution_id)?;
+        distribution.creator.require_auth();
+
+        if storage::get_clawback_time(&env, distribution_id).is_some() {
+            return Err(ContractError::AlreadyClawedBack);
+        }
+        if distribution.status != DistributionStatus::Active {
+            return Err(ContractError::DistributionNotActive);
+        }
+
+        let schedule = match storage::get_vesting_schedule(&env, distribution_id) {
+            Some(schedule) => schedule,
+            None => return Err(ContractError::NothingToClawback),
+        };
+
+        let now = env.ledger().timestamp();
+        let vested_total = vesting::vested_amount(&schedule, distribution.total_amount, now)?;
+        let unvested = distribution
+            .total_amount
+            .checked_sub(vested_total)
+            .ok_or(ContractError::ArithmeticOverflow)?;
+        if unvested <= 0 {
+            return Err(ContractError::NothingToClawback);
+        }
+
+        storage::set_clawback_time(&env, distribution_id, now);
+        distribution.status = DistributionStatus::ClawedBack;
+        storage::set_distribution(&env, distribution_id, &distribution);
+
+        let contract_address = env.current_contract_address();
+        token::Client::new(&env, &distribution.token).transfer(
+            &contract_address,
+            &distribution.creator,
+            &unvested,
+        );
+
+        events::stream_clawed_back(&env, distribution_id, &distribution.creator, unvested, now);
+
+        Ok(unvested)
+    }
+
     /// Sweeps remaining unclaimed tokens to a recipient address if cancelled or expired.
     pub fn sweep(env: Env, distribution_id: u32, to: Address) -> Result<i128, ContractError> {
         storage::bump_instance(&env);
@@ -343,6 +390,11 @@ impl YieldStreamDistributor {
     /// View: Gets the cumulative amount already claimed for a leaf.
     pub fn get_claimed_amount(env: Env, distribution_id: u32, index: u32) -> i128 {
         storage::get_claimed_amount(&env, distribution_id, index)
+    }
+
+    /// View: Gets the ledger timestamp when a stream was clawed back, if any.
+    pub fn get_clawback_time(env: Env, distribution_id: u32) -> Option<u64> {
+        storage::get_clawback_time(&env, distribution_id)
     }
 
     /// View: Computes the amount currently claimable for a leaf.
