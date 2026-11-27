@@ -202,9 +202,10 @@ impl YieldStreamDistributor {
             return Err(ContractError::InvalidProof);
         }
 
+        let clawback_time = storage::get_clawback_time(&env, distribution_id);
         let vested = match storage::get_vesting_schedule(&env, distribution_id) {
             Some(schedule) => {
-                let vesting_time = storage::get_clawback_time(&env, distribution_id).unwrap_or(now);
+                let vesting_time = clawback_time.unwrap_or(now);
                 vesting::vested_amount(&schedule, amount, vesting_time)?
             }
             None => amount,
@@ -221,7 +222,9 @@ impl YieldStreamDistributor {
             .ok_or(ContractError::ArithmeticOverflow)?;
         storage::set_claimed_amount(&env, distribution_id, index, leaf_claimed);
 
-        if leaf_claimed >= amount {
+        let fully_claimed =
+            leaf_claimed >= amount || (clawback_time.is_some() && leaf_claimed >= vested);
+        if fully_claimed {
             storage::set_claimed(&env, distribution_id, index);
             distribution.claimed_count = distribution
                 .claimed_count

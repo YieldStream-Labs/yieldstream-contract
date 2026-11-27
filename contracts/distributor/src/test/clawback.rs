@@ -115,13 +115,14 @@ fn test_clawback_returns_only_unvested_mid_vesting() {
         .client
         .claim(&dist_id, &0, &recipient, &amount, &proof);
     assert_eq!(fixture.client.get_claimed_amount(&dist_id, &0), 50_000);
+    assert!(fixture.client.is_claimed(&dist_id, &0));
     assert_eq!(fixture.token.balance(&recipient), 50_000);
     assert_eq!(fixture.token.balance(&fixture.contract_id), 0);
 
     let res = fixture
         .client
         .try_claim(&dist_id, &0, &recipient, &amount, &proof);
-    assert_eq!(res, Err(Ok(ContractError::NothingToClaim)));
+    assert_eq!(res, Err(Ok(ContractError::AlreadyClaimed)));
 }
 
 #[test]
