@@ -15,6 +15,30 @@ pub fn distribution_created(
     env.events().publish(topics, data);
 }
 
+/// Emits an event when a new vesting stream is created and funded.
+pub fn stream_created(
+    env: &Env,
+    distribution_id: u32,
+    issuer: &Address,
+    token: &Address,
+    merkle_root: &BytesN<32>,
+    total_amount: i128,
+    start_time: u64,
+    cliff_time: u64,
+    end_time: u64,
+) {
+    let topics = (symbol_short!("stream"), distribution_id, issuer.clone());
+    let data = (
+        token.clone(),
+        merkle_root.clone(),
+        total_amount,
+        start_time,
+        cliff_time,
+        end_time,
+    );
+    env.events().publish(topics, data);
+}
+
 /// Emits an event when a recipient claims their allocation.
 pub fn distribution_claimed(
     env: &Env,
@@ -25,6 +49,19 @@ pub fn distribution_claimed(
 ) {
     let topics = (symbol_short!("claimed"), distribution_id, recipient.clone());
     let data = (index, amount);
+    env.events().publish(topics, data);
+}
+
+/// Emits an event when unvested tokens are returned to the stream issuer.
+pub fn stream_clawed_back(
+    env: &Env,
+    distribution_id: u32,
+    issuer: &Address,
+    amount: i128,
+    timestamp: u64,
+) {
+    let topics = (symbol_short!("clawback"), distribution_id, issuer.clone());
+    let data = (amount, timestamp);
     env.events().publish(topics, data);
 }
 

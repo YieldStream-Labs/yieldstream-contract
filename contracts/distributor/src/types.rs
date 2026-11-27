@@ -13,6 +13,20 @@ pub enum DistributionStatus {
     Completed = 2,
     /// Past end_time without being cancelled; claims halted.
     Expired = 3,
+    /// Unvested tokens were clawed back by the issuer; vesting is frozen.
+    ClawedBack = 4,
+}
+
+/// Linear vesting schedule attached to a distribution stream.
+#[contracttype]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct VestingSchedule {
+    /// Ledger timestamp when linear vesting begins.
+    pub start_time: u64,
+    /// Ledger timestamp before which nothing is claimable.
+    pub cliff_time: u64,
+    /// Ledger timestamp at which the full allocation is vested.
+    pub end_time: u64,
 }
 
 /// Metadata and state for an individual Merkle distribution.
@@ -57,4 +71,10 @@ pub enum DataKey {
     Distribution(u32),
     /// Persistent key: claimed leaf record (distribution_id, leaf_index) -> bool.
     Claimed(u32, u32),
+    /// Persistent key: cumulative amount claimed for a leaf -> i128.
+    ClaimedAmount(u32, u32),
+    /// Persistent key: vesting schedule for a stream -> VestingSchedule.
+    Vesting(u32),
+    /// Persistent key: ledger timestamp when a stream was clawed back -> u64.
+    ClawbackTime(u32),
 }

@@ -1,5 +1,5 @@
 use crate::errors::ContractError;
-use crate::types::{DataKey, Distribution};
+use crate::types::{DataKey, Distribution, VestingSchedule};
 use soroban_sdk::{Address, Env};
 
 /// Ledger constants for TTL management (~5 seconds per ledger on Stellar).
@@ -35,6 +35,36 @@ pub fn bump_distribution(env: &Env, id: u32) {
 /// Extends the TTL of a specific claimed record in persistent storage.
 pub fn bump_claimed(env: &Env, id: u32, index: u32) {
     let key = DataKey::Claimed(id, index);
+    env.storage().persistent().extend_ttl(
+        &key,
+        PERSISTENT_LIFETIME_THRESHOLD,
+        PERSISTENT_BUMP_AMOUNT,
+    );
+}
+
+/// Extends the TTL of a specific claimed-amount record in persistent storage.
+pub fn bump_claimed_amount(env: &Env, id: u32, index: u32) {
+    let key = DataKey::ClaimedAmount(id, index);
+    env.storage().persistent().extend_ttl(
+        &key,
+        PERSISTENT_LIFETIME_THRESHOLD,
+        PERSISTENT_BUMP_AMOUNT,
+    );
+}
+
+/// Extends the TTL of a specific vesting schedule in persistent storage.
+pub fn bump_vesting(env: &Env, id: u32) {
+    let key = DataKey::Vesting(id);
+    env.storage().persistent().extend_ttl(
+        &key,
+        PERSISTENT_LIFETIME_THRESHOLD,
+        PERSISTENT_BUMP_AMOUNT,
+    );
+}
+
+/// Extends the TTL of a specific clawback timestamp in persistent storage.
+pub fn bump_clawback_time(env: &Env, id: u32) {
+    let key = DataKey::ClawbackTime(id);
     env.storage().persistent().extend_ttl(
         &key,
         PERSISTENT_LIFETIME_THRESHOLD,
@@ -128,4 +158,55 @@ pub fn set_claimed(env: &Env, id: u32, index: u32) {
     let key = DataKey::Claimed(id, index);
     env.storage().persistent().set(&key, &true);
     bump_claimed(env, id, index);
+}
+
+/// Gets the cumulative amount already claimed for a leaf, defaulting to zero.
+pub fn get_claimed_amount(env: &Env, id: u32, index: u32) -> i128 {
+    let key = DataKey::ClaimedAmount(id, index);
+    let amount: i128 = env.storage().persistent().get(&key).unwrap_or(0);
+    if env.storage().persistent().has(&key) {
+        bump_claimed_amount(env, id, index);
+    }
+    amount
+}
+
+/// Sets the cumulative amount claimed for a leaf and extends its TTL.
+pub fn set_claimed_amount(env: &Env, id: u32, index: u32, amount: i128) {
+    let key = DataKey::ClaimedAmount(id, index);
+    env.storage().persistent().set(&key, &amount);
+    bump_claimed_amount(env, id, index);
+}
+
+/// Retrieves the vesting schedule for a stream, if one is configured.
+pub fn get_vesting_schedule(env: &Env, id: u32) -> Option<VestingSchedule> {
+    let key = DataKey::Vesting(id);
+    let schedule: Option<VestingSchedule> = env.storage().persistent().get(&key);
+    if schedule.is_some() {
+        bump_vesting(env, id);
+    }
+    schedule
+}
+
+/// Saves a vesting schedule for a stream and extends its TTL.
+pub fn set_vesting_schedule(env: &Env, id: u32, schedule: &VestingSchedule) {
+    let key = DataKey::Vesting(id);
+    env.storage().persistent().set(&key, schedule);
+    bump_vesting(env, id);
+}
+
+/// Retrieves the ledger timestamp when a stream was clawed back, if applicable.
+pub fn get_clawback_time(env: &Env, id: u32) -> Option<u64> {
+    let key = DataKey::ClawbackTime(id);
+    let timestamp: Option<u64> = env.storage().persistent().get(&key);
+    if timestamp.is_some() {
+        bump_clawback_time(env, id);
+    }
+    timestamp
+}
+
+/// Records the ledger timestamp when a stream was clawed back.
+pub fn set_clawback_time(env: &Env, id: u32, timestamp: u64) {
+    let key = DataKey::ClawbackTime(id);
+    env.storage().persistent().set(&key, &timestamp);
+    bump_clawback_time(env, id);
 }

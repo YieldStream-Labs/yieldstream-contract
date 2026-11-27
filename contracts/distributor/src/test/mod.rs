@@ -1,8 +1,10 @@
 mod cancel_sweep;
 mod claim;
+mod clawback;
 mod create;
 mod upgrade;
 mod vectors;
+mod vesting;
 
 extern crate std;
 use std::vec::Vec as StdVec;

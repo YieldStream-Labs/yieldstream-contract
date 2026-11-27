@@ -30,9 +30,12 @@
   - Instance storage for global counters and administrative authority.
   - Persistent storage for distribution metadata and claimed leaf records.
   - Automatic TTL extensions on every interaction (`extend_ttl`) guaranteeing state longevity.
+- **Vesting & Clawback**:
+  - Per-stream start, cliff, and linear vesting schedules; claims are capped at the amount vested at the current ledger timestamp.
+  - Issuer-only clawback recovers unvested tokens while leaving already-vested tokens claimable by recipients.
 - **Capital Safety & Sweeping**:
   - Creator cancellation: Creators can cancel an active campaign if needed.
-  - Clawback & Sweep: After expiration or cancellation, unclaimed tokens can be swept back to a designated treasury address.
+  - Sweep: After expiration or cancellation, unclaimed tokens can be swept back to a designated treasury address.
 - **Deterministic Test Vectors**: Validated with verifiable JSON Merkle test vectors in `test-vectors/merkle_v1.json`.
 
 ---
@@ -59,12 +62,15 @@ yieldstream-contract/
         ├── errors.rs               # ContractError error codes
         ├── storage.rs              # Instance and persistent storage helpers + TTL
         ├── merkle.rs               # Domain-separated Merkle proof verification
+        ├── vesting.rs              # Cliff-aware linear vesting math
         ├── events.rs               # Structured contract lifecycle events
         └── test/
             ├── mod.rs              # Test harness and tree generator
             ├── create.rs           # Creation and multi-tenant test suite
             ├── claim.rs            # Claim verification and double-claim suite
             ├── cancel_sweep.rs     # Cancellation and treasury sweep suite
+            ├── vesting.rs          # Cliff, partial vesting, and SAC token suite
+            ├── clawback.rs         # Clawback authorization and math suite
             └── vectors.rs          # Merkle vector conformance test suite
 ```
 
@@ -88,10 +94,16 @@ $$\text{parent} = \text{SHA-256}(0\text{x}01 \mathbin{\Vert} \min(a, b) \mathbin
 |---|---|---|
 | `initialize(admin)` | Admin Auth | Sets the initial contract administrator. |
 | `create_distribution(creator, token, merkle_root, total_amount, num_recipients, end_time)` | Creator Auth | Creates and funds a new distribution campaign. |
-| `claim(distribution_id, index, recipient, amount, proof)` | Recipient Auth | Verifies proof and transfers tokens to recipient. |
+| `create_stream(issuer, token, merkle_root, total_amount, num_recipients, start_time, cliff_time, end_time)` | Issuer Auth | Creates and funds a linearly vesting stream with a cliff. |
+| `claim(distribution_id, index, recipient, amount, proof)` | Recipient Auth | Verifies proof and transfers the currently vested amount to the recipient. |
+| `clawback(distribution_id)` | Issuer Auth | Returns unvested tokens to the issuer and freezes vesting. |
 | `cancel(distribution_id)` | Creator Auth | Cancels active distribution, halting new claims. |
 | `sweep(distribution_id, to)` | Creator Auth | Sweeps remaining unclaimed tokens if expired or cancelled. |
 | `get_distribution(distribution_id)` | Read-only | Returns distribution details and current status. |
+| `get_vesting_schedule(distribution_id)` | Read-only | Returns a stream's start, cliff, and end timestamps. |
+| `get_claimed_amount(distribution_id, index)` | Read-only | Returns the cumulative amount claimed for a leaf. |
+| `get_claimable_amount(distribution_id, index, amount)` | Read-only | Returns the amount currently claimable for a leaf. |
+| `get_clawback_time(distribution_id)` | Read-only | Returns when a stream was clawed back, if any. |
 | `is_claimed(distribution_id, index)` | Read-only | Checks if a leaf index has already been claimed. |
 | `get_version()` | Read-only | Returns current contract code version. |
 | `get_admin()` | Read-only | Returns current contract administrator address. |

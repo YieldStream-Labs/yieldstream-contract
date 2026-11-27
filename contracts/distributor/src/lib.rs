@@ -1,17 +1,19 @@
 #![no_std]
+#![allow(clippy::too_many_arguments)]
 
 pub mod errors;
 pub mod events;
 pub mod merkle;
 pub mod storage;
 pub mod types;
+pub mod vesting;
 
 #[cfg(test)]
 mod test;
 
 use errors::ContractError;
 use soroban_sdk::{contract, contractimpl, token, Address, BytesN, Env, Vec};
-use types::{Distribution, DistributionStatus};
+use types::{Distribution, DistributionStatus, VestingSchedule};
 
 #[contract]
 pub struct YieldStreamDistributor;
@@ -71,29 +73,16 @@ impl YieldStreamDistributor {
             return Err(ContractError::InvalidEndTime);
         }
 
-        let next_id = storage::get_distribution_count(&env)
-            .checked_add(1)
-            .ok_or(ContractError::ArithmeticOverflow)?;
-        storage::set_distribution_count(&env, next_id);
-
-        let contract_address = env.current_contract_address();
-        token::Client::new(&env, &token).transfer(&creator, &contract_address, &total_amount);
-
-        let distribution = Distribution {
-            id: next_id,
-            creator: creator.clone(),
-            token: token.clone(),
-            merkle_root: merkle_root.clone(),
+        let next_id = create_and_fund(
+            &env,
+            &creator,
+            &token,
+            &merkle_root,
             total_amount,
-            claimed_amount: 0,
             num_recipients,
-            claimed_count: 0,
-            created_at: env.ledger().timestamp(),
             end_time,
-            status: DistributionStatus::Active,
-        };
+        )?;
 
-        storage::set_distribution(&env, next_id, &distribution);
         events::distribution_created(
             &env,
             next_id,
@@ -101,6 +90,65 @@ impl YieldStreamDistributor {
             &token,
             &merkle_root,
             total_amount,
+            end_time,
+        );
+
+        Ok(next_id)
+    }
+
+    /// Creates a vesting stream with a cliff and linear unlock schedule.
+    ///
+    /// The issuer funds the stream immediately. Recipients can claim only the
+    /// portion vested at the current ledger timestamp, subject to the cliff.
+    pub fn create_stream(
+        env: Env,
+        issuer: Address,
+        token: Address,
+        merkle_root: BytesN<32>,
+        total_amount: i128,
+        num_recipients: u32,
+        start_time: u64,
+        cliff_time: u64,
+        end_time: u64,
+    ) -> Result<u32, ContractError> {
+        issuer.require_auth();
+
+        if total_amount <= 0 {
+            return Err(ContractError::InvalidAmount);
+        }
+        if num_recipients == 0 {
+            return Err(ContractError::InvalidRecipientCount);
+        }
+        if end_time <= start_time || cliff_time < start_time || cliff_time > end_time {
+            return Err(ContractError::InvalidVestingSchedule);
+        }
+
+        let next_id = create_and_fund(
+            &env,
+            &issuer,
+            &token,
+            &merkle_root,
+            total_amount,
+            num_recipients,
+            0,
+        )?;
+
+        let schedule = VestingSchedule {
+            start_time,
+            cliff_time,
+            end_time,
+        };
+        storage::set_vesting_schedule(&env, next_id, &schedule);
+
+        events::stream_created(
+            &env,
+            next_id,
+            &issuer,
+            &token,
+            &merkle_root,
+            total_amount,
+            start_time,
+            cliff_time,
             end_time,
         );
 
@@ -133,11 +181,20 @@ impl YieldStreamDistributor {
         if distribution.status == DistributionStatus::Cancelled {
             return Err(ContractError::DistributionCancelled);
         }
-        if distribution.status != DistributionStatus::Active {
+        if distribution.status != DistributionStatus::Active
+            && distribution.status != DistributionStatus::ClawedBack
+        {
             return Err(ContractError::DistributionNotActive);
         }
-        if distribution.end_time > 0 && env.ledger().timestamp() >= distribution.end_time {
+
+        let now = env.ledger().timestamp();
+        if distribution.end_time > 0 && now >= distribution.end_time {
             return Err(ContractError::DistributionExpired);
+        }
+
+        let already_claimed = storage::get_claimed_amount(&env, distribution_id, index);
+        if already_claimed >= amount {
+            return Err(ContractError::AlreadyClaimed);
         }
 
         let leaf = merkle::compute_leaf(&env, distribution_id, index, &recipient, amount);
@@ -145,15 +202,39 @@ impl YieldStreamDistributor {
             return Err(ContractError::InvalidProof);
         }
 
-        storage::set_claimed(&env, distribution_id, index);
+        let clawback_time = storage::get_clawback_time(&env, distribution_id);
+        let vested = match storage::get_vesting_schedule(&env, distribution_id) {
+            Some(schedule) => {
+                let vesting_time = clawback_time.unwrap_or(now);
+                vesting::vested_amount(&schedule, amount, vesting_time)?
+            }
+            None => amount,
+        };
+        let claimable = vested
+            .checked_sub(already_claimed)
+            .ok_or(ContractError::ArithmeticOverflow)?;
+        if claimable <= 0 {
+            return Err(ContractError::NothingToClaim);
+        }
+
+        let leaf_claimed = already_claimed
+            .checked_add(claimable)
+            .ok_or(ContractError::ArithmeticOverflow)?;
+        storage::set_claimed_amount(&env, distribution_id, index, leaf_claimed);
+
+        let fully_claimed =
+            leaf_claimed >= amount || (clawback_time.is_some() && leaf_claimed >= vested);
+        if fully_claimed {
+            storage::set_claimed(&env, distribution_id, index);
+            distribution.claimed_count = distribution
+                .claimed_count
+                .checked_add(1)
+                .ok_or(ContractError::ArithmeticOverflow)?;
+        }
 
         distribution.claimed_amount = distribution
             .claimed_amount
-            .checked_add(amount)
-            .ok_or(ContractError::ArithmeticOverflow)?;
-        distribution.claimed_count = distribution
-            .claimed_count
-            .checked_add(1)
+            .checked_add(claimable)
             .ok_or(ContractError::ArithmeticOverflow)?;
 
         if distribution.claimed_count == distribution.num_recipients
@@ -168,10 +249,10 @@ impl YieldStreamDistributor {
         token::Client::new(&env, &distribution.token).transfer(
             &contract_address,
             &recipient,
-            &amount,
+            &claimable,
         );
 
-        events::distribution_claimed(&env, distribution_id, index, &recipient, amount);
+        events::distribution_claimed(&env, distribution_id, index, &recipient, claimable);
 
         Ok(())
     }
@@ -201,6 +282,53 @@ impl YieldStreamDistributor {
         );
 
         Ok(())
+    }
+
+    /// Claws back unvested tokens from a stream to the issuer.
+    ///
+    /// The vested-but-unclaimed balance stays in the contract for recipients.
+    /// Vesting is frozen at the clawback timestamp so no additional tokens vest.
+    pub fn clawback(env: Env, distribution_id: u32) -> Result<i128, ContractError> {
+        storage::bump_instance(&env);
+        let mut distribution = storage::get_distribution(&env, distribution_id)?;
+        distribution.creator.require_auth();
+
+        if storage::get_clawback_time(&env, distribution_id).is_some() {
+            return Err(ContractError::AlreadyClawedBack);
+        }
+        if distribution.status != DistributionStatus::Active {
+            return Err(ContractError::DistributionNotActive);
+        }
+
+        let schedule = match storage::get_vesting_schedule(&env, distribution_id) {
+            Some(schedule) => schedule,
+            None => return Err(ContractError::NothingToClawback),
+        };
+
+        let now = env.ledger().timestamp();
+        let vested_total = vesting::vested_amount(&schedule, distribution.total_amount, now)?;
+        let unvested = distribution
+            .total_amount
+            .checked_sub(vested_total)
+            .ok_or(ContractError::ArithmeticOverflow)?;
+        if unvested <= 0 {
+            return Err(ContractError::NothingToClawback);
+        }
+
+        storage::set_clawback_time(&env, distribution_id, now);
+        distribution.status = DistributionStatus::ClawedBack;
+        storage::set_distribution(&env, distribution_id, &distribution);
+
+        let contract_address = env.current_contract_address();
+        token::Client::new(&env, &distribution.token).transfer(
+            &contract_address,
+            &distribution.creator,
+            &unvested,
+        );
+
+        events::stream_clawed_back(&env, distribution_id, &distribution.creator, unvested, now);
+
+        Ok(unvested)
     }
 
     /// Sweeps remaining unclaimed tokens to a recipient address if cancelled or expired.
@@ -257,6 +385,54 @@ impl YieldStreamDistributor {
         storage::get_distribution(&env, distribution_id)
     }
 
+    /// View: Retrieves the vesting schedule for a stream, if configured.
+    pub fn get_vesting_schedule(env: Env, distribution_id: u32) -> Option<VestingSchedule> {
+        storage::get_vesting_schedule(&env, distribution_id)
+    }
+
+    /// View: Gets the cumulative amount already claimed for a leaf.
+    pub fn get_claimed_amount(env: Env, distribution_id: u32, index: u32) -> i128 {
+        storage::get_claimed_amount(&env, distribution_id, index)
+    }
+
+    /// View: Gets the ledger timestamp when a stream was clawed back, if any.
+    pub fn get_clawback_time(env: Env, distribution_id: u32) -> Option<u64> {
+        storage::get_clawback_time(&env, distribution_id)
+    }
+
+    /// View: Computes the amount currently claimable for a leaf.
+    pub fn get_claimable_amount(
+        env: Env,
+        distribution_id: u32,
+        index: u32,
+        amount: i128,
+    ) -> Result<i128, ContractError> {
+        if amount <= 0 {
+            return Err(ContractError::InvalidAmount);
+        }
+
+        let distribution = storage::get_distribution(&env, distribution_id)?;
+        if index >= distribution.num_recipients {
+            return Err(ContractError::InvalidLeafIndex);
+        }
+
+        let already_claimed = storage::get_claimed_amount(&env, distribution_id, index);
+        let now = env.ledger().timestamp();
+        let vested = match storage::get_vesting_schedule(&env, distribution_id) {
+            Some(schedule) => {
+                let vesting_time = storage::get_clawback_time(&env, distribution_id).unwrap_or(now);
+                vesting::vested_amount(&schedule, amount, vesting_time)?
+            }
+            None => amount,
+        };
+
+        if vested > already_claimed {
+            Ok(vested - already_claimed)
+        } else {
+            Ok(0)
+        }
+    }
+
     /// View: Checks whether a specific leaf index has been claimed.
     pub fn is_claimed(env: Env, distribution_id: u32, index: u32) -> bool {
         storage::is_claimed(&env, distribution_id, index)
@@ -297,4 +473,39 @@ impl YieldStreamDistributor {
     ) -> bool {
         merkle::verify_merkle_proof(&env, &proof, &root, &leaf)
     }
+}
+
+fn create_and_fund(
+    env: &Env,
+    creator: &Address,
+    token: &Address,
+    merkle_root: &BytesN<32>,
+    total_amount: i128,
+    num_recipients: u32,
+    end_time: u64,
+) -> Result<u32, ContractError> {
+    let next_id = storage::get_distribution_count(env)
+        .checked_add(1)
+        .ok_or(ContractError::ArithmeticOverflow)?;
+    storage::set_distribution_count(env, next_id);
+
+    let contract_address = env.current_contract_address();
+    token::Client::new(env, token).transfer(creator, &contract_address, &total_amount);
+
+    let distribution = Distribution {
+        id: next_id,
+        creator: creator.clone(),
+        token: token.clone(),
+        merkle_root: merkle_root.clone(),
+        total_amount,
+        claimed_amount: 0,
+        num_recipients,
+        claimed_count: 0,
+        created_at: env.ledger().timestamp(),
+        end_time,
+        status: DistributionStatus::Active,
+    };
+
+    storage::set_distribution(env, next_id, &distribution);
+    Ok(next_id)
 }
