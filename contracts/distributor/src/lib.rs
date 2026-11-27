@@ -5,6 +5,7 @@ pub mod events;
 pub mod merkle;
 pub mod storage;
 pub mod types;
+pub mod vesting;
 
 #[cfg(test)]
 mod test;

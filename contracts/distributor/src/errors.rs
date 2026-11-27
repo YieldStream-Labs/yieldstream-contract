@@ -39,4 +39,12 @@ pub enum ContractError {
     InvalidRecipientCount = 16,
     /// Provided address cannot be zero or empty.
     ZeroAddress = 17,
+    /// Nothing is currently vested or claimable for this leaf.
+    NothingToClaim = 18,
+    /// Vesting start, cliff, and end timestamps are inconsistent.
+    InvalidVestingSchedule = 19,
+    /// No unvested tokens remain to claw back.
+    NothingToClawback = 20,
+    /// Unvested tokens have already been clawed back for this stream.
+    AlreadyClawedBack = 21,
 }
